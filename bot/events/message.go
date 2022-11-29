@@ -12,18 +12,18 @@ func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	command, _ := splitMessageContent(m.Content)
+	command, args := splitMessageContent(m.Content)
 
 	if command == "!ping" {
-		commands.PingCommand(s, m)
+		commands.PingCommand(s, m, args)
 	}
 }
 
-func splitMessageContent(content string) (prefix string, values []string) {
+func splitMessageContent(content string) (prefix string, args []string) {
 	splitContent := strings.Split(content, " ")
 
 	prefix = splitContent[0]
-	values = splitContent[1:]
+	args = splitContent[1:]
 
-	return
+	return prefix, args
 }
