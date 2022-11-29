@@ -29,7 +29,7 @@ func (bot *Bot) SetupIntents(intents discordgo.Intent) {
 	bot.dg.Identify.Intents = intents
 }
 
-func (bot *Bot) AddCommandHandlers() {
+func (bot *Bot) AddHandlers() {
 	bot.dg.AddHandler(events.MessageCreate)
 }
 
