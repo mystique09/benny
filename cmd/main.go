@@ -16,6 +16,6 @@ func main() {
 
 	benny := bot.New(&config)
 	benny.SetupIntents(discordgo.IntentsGuildMessages)
-	benny.AddCommandHandlers()
+	benny.AddHandlers()
 	benny.StartBot()
 }
