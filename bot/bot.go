@@ -1,28 +1,36 @@
 package bot
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
-	"voidmanager/bot/events"
+	"voidmanager/db/ent"
 	"voidmanager/utils"
 
 	"github.com/bwmarrin/discordgo"
 )
 
 type Bot struct {
-	cfg *utils.Config
-	dg  *discordgo.Session
+	dg      *discordgo.Session
+	handler Handler
 }
 
-func New(cfg *utils.Config) *Bot {
+func New(cfg *utils.Config, client *ent.Client) *Bot {
 	dg, err := discordgo.New("Bot " + cfg.BotToken)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return &Bot{cfg, dg}
+
+	handler := Handler{
+		cfg,
+		client,
+	}
+
+	return &Bot{
+		dg:      dg,
+		handler: handler,
+	}
 }
 
 func (bot *Bot) SetupIntents(intents discordgo.Intent) {
@@ -30,31 +38,17 @@ func (bot *Bot) SetupIntents(intents discordgo.Intent) {
 }
 
 func (bot *Bot) AddHandlers() {
-	bot.dg.AddHandler(events.MessageCreate)
+	bot.dg.AddHandler(bot.handler.Ready)
+	bot.dg.AddHandler(bot.handler.MessageCreate)
+	bot.dg.AddHandler(bot.handler.MemberCreate)
+	bot.dg.AddHandler(bot.handler.MemberRemove)
 }
 
 func (bot *Bot) StartBot() {
 	if err := bot.dg.Open(); err != nil {
 		log.Fatal(err.Error())
 	}
-	bot.printBanner()
 	bot.listenShutdown()
-}
-
-func (bot *Bot) printBanner() {
-	fmt.Printf(`
-==== Bot started ====
-Bot Version: %v
-Bot Token: %v
-Bot Onwer: %v
-Channel ID: %v
-Application ID: %v
-`,
-		bot.cfg.BotVersion,
-		bot.cfg.BotToken,
-		bot.cfg.BotOwner,
-		bot.cfg.BotChannelId,
-		bot.cfg.BotApplicationId)
 }
 
 func (bot *Bot) listenShutdown() {
