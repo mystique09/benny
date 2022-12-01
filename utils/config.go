@@ -8,10 +8,11 @@ import (
 
 type Config struct {
 	BotToken         string `mapstructure:"BOT_TOKEN"`
-	BotVersion       string `mapstructure:"BENNY_VERSION"`
+	BotVersion       string `mapstructure:"BOT_VERSION"`
 	BotOwner         string `mapstructure:"BOT_OWNER"`
 	BotChannelId     string `mapstructure:"BOT_CHANNEL_ID"`
 	BotApplicationId string `mapstructure:"BOT_APPLICATION_ID"`
+	DatabaseUrl      string `mapstructure:"DATABASE_URL"`
 }
 
 func LoadConfig(configPath, configName string) (Config, error) {
@@ -30,6 +31,6 @@ func LoadConfig(configPath, configName string) (Config, error) {
 		return Config{}, err
 	}
 
-	log.Println("Initialized config.")
+	log.Println("CONFIG SUCCESSFULLY LOADED")
 	return config, nil
 }
