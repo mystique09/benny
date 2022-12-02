@@ -42,13 +42,27 @@ func (bot *Bot) AddHandlers() {
 	bot.dg.AddHandler(bot.handler.MessageCreate)
 	bot.dg.AddHandler(bot.handler.MemberCreate)
 	bot.dg.AddHandler(bot.handler.MemberRemove)
+	bot.dg.AddHandler(bot.handler.SlashCommandsHandler)
 }
 
-func (bot *Bot) StartBot() {
+func (bot *Bot) StartBot(removeCommandsAfterShutdown bool) {
 	if err := bot.dg.Open(); err != nil {
 		log.Fatal(err.Error())
 	}
+
+	var registeredCommands []*discordgo.ApplicationCommand = make([]*discordgo.ApplicationCommand, len(commands))
+	bot.createSlashCommands(registeredCommands)
+
+	defer bot.dg.Close()
+
 	bot.listenShutdown()
+
+	if removeCommandsAfterShutdown {
+		bot.removeSlashCommands(registeredCommands)
+	}
+
+	log.Println("Gracefully shutting down...")
+	log.Println("Shutdown successful.")
 }
 
 func (bot *Bot) listenShutdown() {
