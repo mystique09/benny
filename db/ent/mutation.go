@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"voidmanager/db/ent/guild"
 	"voidmanager/db/ent/predicate"
 	"voidmanager/db/ent/user"
 
@@ -22,8 +23,326 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeUser = "User"
+	TypeGuild = "Guild"
+	TypeUser  = "User"
 )
+
+// GuildMutation represents an operation that mutates the Guild nodes in the graph.
+type GuildMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *string
+	bot_prefix    *string
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*Guild, error)
+	predicates    []predicate.Guild
+}
+
+var _ ent.Mutation = (*GuildMutation)(nil)
+
+// guildOption allows management of the mutation configuration using functional options.
+type guildOption func(*GuildMutation)
+
+// newGuildMutation creates new mutation for the Guild entity.
+func newGuildMutation(c config, op Op, opts ...guildOption) *GuildMutation {
+	m := &GuildMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeGuild,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withGuildID sets the ID field of the mutation.
+func withGuildID(id string) guildOption {
+	return func(m *GuildMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Guild
+		)
+		m.oldValue = func(ctx context.Context) (*Guild, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Guild.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withGuild sets the old Guild of the mutation.
+func withGuild(node *Guild) guildOption {
+	return func(m *GuildMutation) {
+		m.oldValue = func(context.Context) (*Guild, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m GuildMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m GuildMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Guild entities.
+func (m *GuildMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *GuildMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *GuildMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Guild.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetBotPrefix sets the "bot_prefix" field.
+func (m *GuildMutation) SetBotPrefix(s string) {
+	m.bot_prefix = &s
+}
+
+// BotPrefix returns the value of the "bot_prefix" field in the mutation.
+func (m *GuildMutation) BotPrefix() (r string, exists bool) {
+	v := m.bot_prefix
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBotPrefix returns the old "bot_prefix" field's value of the Guild entity.
+// If the Guild object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GuildMutation) OldBotPrefix(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBotPrefix is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBotPrefix requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBotPrefix: %w", err)
+	}
+	return oldValue.BotPrefix, nil
+}
+
+// ResetBotPrefix resets all changes to the "bot_prefix" field.
+func (m *GuildMutation) ResetBotPrefix() {
+	m.bot_prefix = nil
+}
+
+// Where appends a list predicates to the GuildMutation builder.
+func (m *GuildMutation) Where(ps ...predicate.Guild) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *GuildMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (Guild).
+func (m *GuildMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *GuildMutation) Fields() []string {
+	fields := make([]string, 0, 1)
+	if m.bot_prefix != nil {
+		fields = append(fields, guild.FieldBotPrefix)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *GuildMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case guild.FieldBotPrefix:
+		return m.BotPrefix()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *GuildMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case guild.FieldBotPrefix:
+		return m.OldBotPrefix(ctx)
+	}
+	return nil, fmt.Errorf("unknown Guild field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *GuildMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case guild.FieldBotPrefix:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBotPrefix(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Guild field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *GuildMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *GuildMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *GuildMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Guild numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *GuildMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *GuildMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *GuildMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Guild nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *GuildMutation) ResetField(name string) error {
+	switch name {
+	case guild.FieldBotPrefix:
+		m.ResetBotPrefix()
+		return nil
+	}
+	return fmt.Errorf("unknown Guild field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *GuildMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *GuildMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *GuildMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *GuildMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *GuildMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *GuildMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *GuildMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown Guild unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *GuildMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown Guild edge %s", name)
+}
 
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {

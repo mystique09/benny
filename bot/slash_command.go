@@ -6,7 +6,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-type InteractionCommandHandler = func(s *discordgo.Session, i *discordgo.InteractionCreate)
+type InteractionCommandHandler = func(s *discordgo.Session, i *discordgo.InteractionCreate, c *Commands)
 type InteractionCommandHandlersMap = map[string]InteractionCommandHandler
 
 var commands []*discordgo.ApplicationCommand = []*discordgo.ApplicationCommand{
@@ -18,7 +18,7 @@ var commands []*discordgo.ApplicationCommand = []*discordgo.ApplicationCommand{
 				Name:        "user",
 				Description: "the user to shoutout",
 				Type:        discordgo.ApplicationCommandOptionUser,
-				Required:    false,
+				Required:    true,
 			},
 		},
 	},
@@ -28,11 +28,27 @@ var commands []*discordgo.ApplicationCommand = []*discordgo.ApplicationCommand{
 		Options: []*discordgo.ApplicationCommandOption{
 			{
 				Name:        "user",
-				Description: "the user to shoutout",
+				Description: "the user to say hello",
 				Type:        discordgo.ApplicationCommandOptionUser,
-				Required:    false,
+				Required:    true,
 			},
 		},
+	},
+	{
+		Name:        "set-prefix",
+		Description: "set the prefix of the bot",
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Name:        "prefix",
+				Description: "the new prefix",
+				Type:        discordgo.ApplicationCommandOptionString,
+				Required:    true,
+			},
+		},
+	},
+	{
+		Name:        "prefix",
+		Description: "get the current bot prefix of bot",
 	},
 }
 
@@ -48,7 +64,8 @@ func (bot *Bot) createSlashCommands(registeredCommands []*discordgo.ApplicationC
 		registeredCommands[i] = command
 	}
 
-	log.Printf("Total slash commands created: %d", len(registeredCommands))
+	log.Printf("Successfully added all slash commands to guild: %s", bot.handler.cfg.BotGuildId)
+	log.Printf("[SUCCESS] Total slash commands created: %d", len(registeredCommands))
 	return registeredCommands
 }
 
