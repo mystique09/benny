@@ -7,6 +7,18 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+var commandHandlers InteractionCommandHandlersMap = InteractionCommandHandlersMap{
+	"shoutout": SlashPingCommand,
+	"hello":    SlashHelloCommand,
+}
+
+func (h *Handler) SlashCommandsHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	log.Println(i.ApplicationCommandData().Name, i.Member.User.ID, i.Member.User)
+	if handler, ok := commandHandlers[i.ApplicationCommandData().Name]; ok {
+		handler(s, i)
+	}
+}
+
 func SlashPingCommand(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	options := i.ApplicationCommandData().Options
 	optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
