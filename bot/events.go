@@ -108,7 +108,7 @@ func (e *Events) MemberCreate(s *discordgo.Session, newMember *discordgo.GuildMe
 		log.Printf("user %v already exist", newMember.User.ID)
 	}
 
-	log.Printf(`New guild %s added`, newMember.Member.User.ID)
+	log.Printf(`New member %s added`, newMember.Member.User.ID)
 }
 
 func (e *Events) MemberRemove(s *discordgo.Session, member *discordgo.GuildMemberRemove) {
