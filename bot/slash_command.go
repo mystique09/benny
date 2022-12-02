@@ -65,15 +65,3 @@ func (bot *Bot) removeSlashCommands(registeredCommands []*discordgo.ApplicationC
 
 	log.Printf("Total slash commands removed: %d", len(registeredCommands))
 }
-
-var commandHandlers InteractionCommandHandlersMap = InteractionCommandHandlersMap{
-	"shoutout": SlashPingCommand,
-	"hello":    SlashHelloCommand,
-}
-
-func (h *Handler) SlashCommandsHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	log.Println(i.ApplicationCommandData().Name, i.Member.User.ID, i.Member.User)
-	if handler, ok := commandHandlers[i.ApplicationCommandData().Name]; ok {
-		handler(s, i)
-	}
-}
