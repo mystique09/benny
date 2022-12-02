@@ -11,6 +11,7 @@ type Config struct {
 	BotVersion       string `mapstructure:"BOT_VERSION"`
 	BotOwner         string `mapstructure:"BOT_OWNER"`
 	BotChannelId     string `mapstructure:"BOT_CHANNEL_ID"`
+	BotGuildId       string `mapstructure:"BOT_GUILD_ID"`
 	BotApplicationId string `mapstructure:"BOT_APPLICATION_ID"`
 	DatabaseUrl      string `mapstructure:"DATABASE_URL"`
 }
