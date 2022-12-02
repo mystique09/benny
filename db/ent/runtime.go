@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"voidmanager/db/ent/guild"
 	"voidmanager/db/ent/schema"
 	"voidmanager/db/ent/user"
 )
@@ -11,6 +12,18 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	guildFields := schema.Guild{}.Fields()
+	_ = guildFields
+	// guildDescBotPrefix is the schema descriptor for bot_prefix field.
+	guildDescBotPrefix := guildFields[1].Descriptor()
+	// guild.DefaultBotPrefix holds the default value on creation for the bot_prefix field.
+	guild.DefaultBotPrefix = guildDescBotPrefix.Default.(string)
+	// guild.BotPrefixValidator is a validator for the "bot_prefix" field. It is called by the builders before save.
+	guild.BotPrefixValidator = guildDescBotPrefix.Validators[0].(func(string) error)
+	// guildDescID is the schema descriptor for id field.
+	guildDescID := guildFields[0].Descriptor()
+	// guild.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	guild.IDValidator = guildDescID.Validators[0].(func(string) error)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescName is the schema descriptor for name field.

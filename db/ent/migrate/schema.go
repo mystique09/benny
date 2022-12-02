@@ -8,6 +8,17 @@ import (
 )
 
 var (
+	// GuildsColumns holds the columns for the "guilds" table.
+	GuildsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "bot_prefix", Type: field.TypeString, Default: "!"},
+	}
+	// GuildsTable holds the schema information for the "guilds" table.
+	GuildsTable = &schema.Table{
+		Name:       "guilds",
+		Columns:    GuildsColumns,
+		PrimaryKey: []*schema.Column{GuildsColumns[0]},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString},
@@ -21,6 +32,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		GuildsTable,
 		UsersTable,
 	}
 )
