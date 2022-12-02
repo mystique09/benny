@@ -22,7 +22,7 @@ func main() {
 
 	dbClient := db.InitDB(&config)
 
-	benny := bot.New(&config, dbClient)
+	benny := bot.NewBot(&config, dbClient)
 	benny.SetupIntents(discordgo.IntentsGuildMessages)
 	benny.AddHandlers()
 	benny.StartBot(*removeCommandsAfterShutdown)
