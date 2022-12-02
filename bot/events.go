@@ -15,7 +15,8 @@ func (h *Handler) Ready(s *discordgo.Session, r *discordgo.Ready) {
 	fmt.Println("Token: <redacted>")
 	fmt.Printf("Version: %v \n", h.cfg.BotVersion)
 	fmt.Printf("Onwer: %v \n", h.cfg.BotOwner)
-	fmt.Printf("Application ID: %v \n\n", h.cfg.BotApplicationId)
+	fmt.Printf("Application ID: %v \n", h.cfg.BotApplicationId)
+	fmt.Printf("Guild ID: %v \n\n", h.cfg.BotGuildId)
 }
 
 func (h *Handler) MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
@@ -25,7 +26,9 @@ func (h *Handler) MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate
 
 	command, args := splitMessageContent(m.Content)
 
-	log.Printf("user <@%v> used the %v command with args %v", m.Author.ID, command, args)
+	if strings.HasPrefix(command, "!") {
+		log.Printf("user <@%v> used the %v command with args %v", m.Author.ID, command, args)
+	}
 
 	if command == "!ping" {
 		h.PingCommand(s, m, args)
