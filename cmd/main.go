@@ -1,12 +1,17 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"voidmanager/bot"
 	"voidmanager/db"
 	"voidmanager/utils"
 
 	"github.com/bwmarrin/discordgo"
+)
+
+var (
+	removeCommandsAfterShutdown = flag.Bool("rmslash", true, "Remove all registered slash commands after shutdown.")
 )
 
 func main() {
@@ -20,5 +25,5 @@ func main() {
 	benny := bot.New(&config, dbClient)
 	benny.SetupIntents(discordgo.IntentsGuildMessages)
 	benny.AddHandlers()
-	benny.StartBot()
+	benny.StartBot(*removeCommandsAfterShutdown)
 }
