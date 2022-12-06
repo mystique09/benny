@@ -6,10 +6,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-type InteractionCommandHandler = func(s *discordgo.Session, i *discordgo.InteractionCreate, c *Commands)
-type InteractionCommandHandlersMap = map[string]InteractionCommandHandler
-
-var commands []*discordgo.ApplicationCommand = []*discordgo.ApplicationCommand{
+var slashCommands []*discordgo.ApplicationCommand = []*discordgo.ApplicationCommand{
 	{
 		Name:        "shoutout",
 		Description: "Shoutout the mentioned user",
@@ -35,27 +32,15 @@ var commands []*discordgo.ApplicationCommand = []*discordgo.ApplicationCommand{
 		},
 	},
 	{
-		Name:        "set-prefix",
-		Description: "set the prefix of the bot",
-		Options: []*discordgo.ApplicationCommandOption{
-			{
-				Name:        "prefix",
-				Description: "the new prefix",
-				Type:        discordgo.ApplicationCommandOptionString,
-				Required:    true,
-			},
-		},
-	},
-	{
-		Name:        "prefix",
-		Description: "get the current bot prefix of bot",
+		Name:        "ping",
+		Description: "get the current bot latency",
 	},
 }
 
 func (bot *Bot) createSlashCommands(registeredCommands []*discordgo.ApplicationCommand) []*discordgo.ApplicationCommand {
 	log.Println("Creating slash commands...")
 
-	for i, cmd := range commands {
+	for i, cmd := range slashCommands {
 		log.Printf("Adding `%v` slash command", cmd.Name)
 		command, err := bot.dg.ApplicationCommandCreate(bot.dg.State.User.ID, bot.handler.cfg.BotGuildId, cmd)
 		if err != nil {

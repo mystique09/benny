@@ -19,7 +19,6 @@ type Bot struct {
 type Handler struct {
 	cfg    *utils.Config
 	client *ent.Client
-	events *Events
 }
 
 func NewBot(cfg *utils.Config, client *ent.Client) *Bot {
@@ -28,23 +27,12 @@ func NewBot(cfg *utils.Config, client *ent.Client) *Bot {
 		log.Fatal(err)
 	}
 
-	handler := Handler{
-		cfg:    cfg,
-		client: client,
-		events: &Events{
-			client: client,
-			cfg:    cfg,
-			commands: &Commands{
-				client:   client,
-				cfg:      cfg,
-				prefixes: map[GuildId]Prefix{},
-			},
-		},
-	}
-
 	return &Bot{
-		dg:      dg,
-		handler: handler,
+		dg: dg,
+		handler: Handler{
+			cfg:    cfg,
+			client: client,
+		},
 	}
 }
 
@@ -53,11 +41,10 @@ func (bot *Bot) SetupIntents(intents discordgo.Intent) {
 }
 
 func (bot *Bot) AddHandlers() {
-	bot.dg.AddHandler(bot.handler.events.Ready)
-	bot.dg.AddHandler(bot.handler.events.MessageCreate)
-	bot.dg.AddHandler(bot.handler.events.MemberCreate)
-	bot.dg.AddHandler(bot.handler.events.MemberRemove)
-	bot.dg.AddHandler(bot.handler.events.SlashCommandsHandler)
+	bot.dg.AddHandler(bot.handler.Ready)
+	bot.dg.AddHandler(bot.handler.MemberCreate)
+	bot.dg.AddHandler(bot.handler.MemberRemove)
+	bot.dg.AddHandler(bot.SlashCommandsHandler)
 }
 
 func (bot *Bot) StartBot(removeCommandsAfterShutdown bool) {
@@ -65,7 +52,7 @@ func (bot *Bot) StartBot(removeCommandsAfterShutdown bool) {
 		log.Fatal(err.Error())
 	}
 
-	var registeredCommands []*discordgo.ApplicationCommand = make([]*discordgo.ApplicationCommand, len(commands))
+	var registeredCommands []*discordgo.ApplicationCommand = make([]*discordgo.ApplicationCommand, len(slashCommands))
 	bot.createSlashCommands(registeredCommands)
 
 	defer bot.dg.Close()
