@@ -2,20 +2,18 @@ package bot
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/bwmarrin/discordgo"
 )
 
 func (h *Handler) Ready(s *discordgo.Session, r *discordgo.Ready) {
-	fmt.Printf("\nLogged in as %v \n", r.User.Username)
-	fmt.Println("Token: <redacted>")
-	fmt.Printf("Version: %v \n", h.cfg.BotVersion)
-	fmt.Printf("Onwer: %v \n", h.cfg.BotOwner)
-	fmt.Printf("Application ID: %v \n", h.cfg.BotApplicationId)
-	fmt.Printf("Guild ID: %v \n", h.cfg.BotGuildId)
-	fmt.Printf("Total slash commands: %d\n\n", len(slashCommands))
+	log.Printf("\nLogged in as %v \n", r.User.Username)
+	log.Printf("Version: %v \n", h.cfg.BotVersion)
+	log.Printf("Onwer: %v \n", h.cfg.BotOwner)
+	log.Printf("Application ID: %v \n", h.cfg.BotApplicationId)
+	log.Printf("Guild ID: %v \n", h.cfg.BotGuildId)
+	log.Printf("Total slash commands: %d\n\n", len(slashCommands))
 }
 
 func (h *Handler) GuildCreate(s *discordgo.Session, newGuild *discordgo.GuildCreate) {

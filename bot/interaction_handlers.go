@@ -32,11 +32,6 @@ func PingHandler(s *discordgo.Session, i *discordgo.InteractionCreate, h *Handle
 			Content: fmt.Sprintf("Bot latency is %d ms", botLatency.Milliseconds()),
 		},
 	}); err != nil {
-		_, err := s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
-			Content: "Something went wrong",
-		})
-
-		log.Println(err.Error())
 		return
 	}
 }
@@ -54,11 +49,6 @@ func HelloHandler(s *discordgo.Session, i *discordgo.InteractionCreate, h *Handl
 			Content: fmt.Sprintf("shoutout to <@%v>", optionMap["user"].Value),
 		},
 	}); err != nil {
-		_, err := s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
-			Content: "Something went wrong",
-		})
-
-		log.Println(err.Error())
 		return
 	}
 }
@@ -76,10 +66,6 @@ func ShoutoutHandler(s *discordgo.Session, i *discordgo.InteractionCreate, h *Ha
 			Content: fmt.Sprintf("hello <@%v>", optionMap["user"].Value),
 		},
 	}); err != nil {
-		_, err := s.FollowupMessageCreate(i.Interaction, true, &discordgo.WebhookParams{
-			Content: "Something went wrong",
-		})
-
 		log.Println(err.Error())
 		return
 	}

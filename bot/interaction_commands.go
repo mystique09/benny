@@ -46,6 +46,7 @@ func (bot *Bot) createSlashCommands(registeredCommands []*discordgo.ApplicationC
 		if err != nil {
 			log.Fatalf("[ERROR] cannot create %v slash command: %v ", cmd.Name, err.Error())
 		}
+		log.Printf("Successfully added `%v` slash command", cmd.Name)
 		registeredCommands[i] = command
 	}
 
@@ -55,15 +56,11 @@ func (bot *Bot) createSlashCommands(registeredCommands []*discordgo.ApplicationC
 }
 
 func (bot *Bot) removeSlashCommands(registeredCommands []*discordgo.ApplicationCommand) {
-	log.Println("Removing slash commands...")
-
 	for _, cmd := range registeredCommands {
-		log.Printf("Removing `%v` slash command", cmd.Name)
+		log.Printf("[INFO] deleting %v slash command", cmd.Name)
 		err := bot.dg.ApplicationCommandDelete(bot.dg.State.User.ID, bot.handler.cfg.BotGuildId, cmd.ID)
 		if err != nil {
 			log.Fatalf("[ERROR] cannot delete %v slash command %v", cmd.Name, err.Error())
 		}
 	}
-
-	log.Printf("Total slash commands removed: %d", len(registeredCommands))
 }

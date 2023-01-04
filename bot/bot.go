@@ -48,6 +48,8 @@ func (bot *Bot) AddHandlers() {
 }
 
 func (bot *Bot) StartBot(removeCommandsAfterShutdown bool) {
+	log.Println("Starting bot...")
+
 	if err := bot.dg.Open(); err != nil {
 		log.Fatal(err.Error())
 	}
